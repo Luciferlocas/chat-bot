@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import config from "./config/env";
+import APIRouter from "./router";
 
 const app = express();
 const PORT = config.PORT;
@@ -14,6 +15,12 @@ async function bootstrap() {
         origin: config.CORS_ORIGIN,
       })
     );
+
+    app.use("/api", APIRouter);
+
+    app.get("/", (req, res) => {
+      res.send("Hello World!");
+    });
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
