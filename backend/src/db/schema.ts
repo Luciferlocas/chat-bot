@@ -5,7 +5,10 @@ import {
   timestamp,
   pgEnum,
   index,
+  integer,
+  jsonb,
 } from "drizzle-orm/pg-core";
+
 import { relations } from "drizzle-orm";
 
 export const senderEnum = pgEnum("sender", ["user", "ai"]);
@@ -25,6 +28,7 @@ export const conversations = pgTable(
     title: text("title"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     lastActiveAt: timestamp("last_active_at").defaultNow().notNull(),
+    totalTokens: integer("total_tokens").default(0).notNull(),
   },
   (table) => [index("conversations_client_idx").on(table.clientId)]
 );
@@ -38,8 +42,10 @@ export const messages = pgTable(
       .notNull(),
     sender: senderEnum("sender").notNull(),
     text: text("text").notNull(),
+    metadata: jsonb("metadata"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
+
   (table) => [index("messages_conversation_idx").on(table.conversationId)]
 );
 

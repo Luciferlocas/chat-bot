@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const chatMessageSchema = z.object({
   clientId: z.string().uuid(),
-  conversationId: z.string().uuid().optional(),
+  conversationId: z.string().uuid().nullable(),
   message: z
     .string()
     .trim()

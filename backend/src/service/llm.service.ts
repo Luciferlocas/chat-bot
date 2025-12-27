@@ -43,6 +43,9 @@ export class LLMService {
     try {
       const chat = model.startChat({
         history: history,
+        generationConfig: {
+          maxOutputTokens: 1000,
+        },
       });
 
       const result = await chat.sendMessage(userMessage);
@@ -54,9 +57,22 @@ export class LLMService {
           tokenUsage: result.response.usageMetadata,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gemini API Error:", error);
-      throw new Error("Failed to generate reply from AI");
+
+      const errorMessage = error.message || error.toString();
+
+      if (errorMessage.includes("API key")) {
+        throw new Error("INVALID_API_KEY");
+      }
+      if (errorMessage.includes("429") || errorMessage.includes("quota")) {
+        throw new Error("RATE_LIMIT");
+      }
+      if (errorMessage.includes("503") || errorMessage.includes("overloaded")) {
+        throw new Error("SERVICE_OVERLOAD");
+      }
+
+      throw new Error("GENERIC_AI_ERROR");
     }
   }
 }

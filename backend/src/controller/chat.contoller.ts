@@ -55,7 +55,9 @@ export class ChatController {
         });
       }
 
-      const messages = await ChatService.getConversation(parsed.data.conversationID);
+      const messages = await ChatService.getConversation(
+        parsed.data.conversationID
+      );
       return res.status(200).json(messages);
     } catch (err) {
       console.error("ChatController getConversation error:", err);

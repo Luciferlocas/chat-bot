@@ -1,6 +1,7 @@
 import { eq, asc, desc } from "drizzle-orm";
 import db from "../db";
 import { clients, conversations, messages } from "../db/schema";
+import { FinishReason, UsageMetadata } from "@google/generative-ai";
 
 export class ChatDto {
   static async getClient(clientId: string) {
@@ -42,7 +43,11 @@ export class ChatDto {
   static async createMessage(
     conversationId: string,
     sender: "user" | "ai",
-    text: string
+    text: string,
+    metadata?: {
+      finishReason: FinishReason | undefined;
+      tokenUsage: UsageMetadata | undefined;
+    }
   ) {
     const [msg] = await db
       .insert(messages)
@@ -50,6 +55,7 @@ export class ChatDto {
         conversationId,
         sender,
         text,
+        metadata,
       })
       .returning();
     return msg;
@@ -66,6 +72,16 @@ export class ChatDto {
     await db
       .update(conversations)
       .set({ lastActiveAt: new Date() })
+      .where(eq(conversations.id, conversationId));
+  }
+
+  static async updateConversationTokens(
+    conversationId: string,
+    totalTokens: number
+  ) {
+    await db
+      .update(conversations)
+      .set({ totalTokens: totalTokens })
       .where(eq(conversations.id, conversationId));
   }
 
